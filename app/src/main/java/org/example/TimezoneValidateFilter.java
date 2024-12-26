@@ -1,15 +1,10 @@
 package org.example;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.TimeZone;
 
 @WebFilter("/time")
@@ -19,24 +14,36 @@ public class TimezoneValidateFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
+    // Обробка запиту
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        String timezone = ((HttpServletRequest) request).getParameter("timezone");
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-        if (timezone != null && !timezone.isEmpty()) {
-            // Перевірка на коректність timezone
-            TimeZone tz = TimeZone.getTimeZone(timezone);
-            if (tz.getID().equals("GMT")) {
-                // Якщо є помилка, тоді 400
-                ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid timezone");
-                return;
-            }
+        String timezone = httpRequest.getParameter("timezone");
+
+        if (timezone != null && !isValidTimezone(timezone)) {
+
+            // Якщо часова зона некоректна, видаємо помилку
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);  // 400
+            httpResponse.getWriter().write("Invalid timezone");
+            return;
         }
 
-        // Продовження обробки
+        // Якщо все коректно, продовжуємо обробку
         chain.doFilter(request, response);
+    }
+
+    // Перевірка валідності часового поясу
+    private boolean isValidTimezone(String timezone) {
+        try {
+            TimeZone.getTimeZone(timezone);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

@@ -6,8 +6,8 @@
  */
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
+
+    id 'java'
     id 'war'
 }
 
@@ -28,7 +28,15 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+
+    // https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf
+    implementation 'org.thymeleaf:thymeleaf:3.1.0.M2'
+
 }
+war {
+    webAppDirName = 'src/main/webapp'
+}
+
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
@@ -37,10 +45,6 @@ java {
     }
 }
 
-application {
-    // Define the main class for the application.
-    mainClass = 'org.example.App'
-}
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
